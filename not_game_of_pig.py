@@ -33,12 +33,34 @@ def player_turn():
 
 player_turn()
 
-def play_game():
-    players = (("Player 1","Player 2"))
-    scores = [0,0]
-    current_player = 0
+def play_game(): 
+    scores = {
+        "Player 1": 0,
+        "Player 2": 0,
+    }
     
-        
+    players = ["Player 1", "Player 2"]
+
+    valid_choices = {"Roll","Hold"}
+    current_index_of_players = 0
+    
+    while True:
+         current_player = players[current_index_of_players]
+
+         print("\n" + current_player + "'s turn")
+         print("Total score: " + str(scores[current_player]))
+
+         turn_score = player_turn()
+
+         scores[current_player] = scores[current_player] + turn_score
+
+         if scores[current_player] >= 100:
+            print(current_player + " wins with " + str(scores[current_player]) + " points!")
+            break
+         
+         current_index = (current_index + 1) % len(players)
+
+play_game()
 
 
        
