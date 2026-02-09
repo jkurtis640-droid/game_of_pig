@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import font
 import random as r
 
 ##DECLARE SOME CONSTANTS
@@ -25,47 +24,94 @@ enemies = []
 
 ##MAKE AN ALIVE BOOL
 alive = True
+score = 0
+score_text = canvas.create_text(10, 10, anchor="nw",text="Score: 0",fill="white",font=("Arial", 14))
+gameover_text = None
+spawn_timer = 0
+fall_speed = 6
 
 ##MOVEMENT FUNCTION
 
-def move_left(event):
+def move_left(event=None):
     canvas.move(player, -20, 0)
 
-def move_right(event):
+def move_right(event=None):
     canvas.move(player, 20, 0)
 
-##BIND BUTTONS
-root.bind("a",move_left)
-root.bind("d",move_right)
+def move_up(event=None):
+    canvas.move(player, 0, -20)
+
+def move_down(event=None):
+    canvas.move(player, 0, 20)
+
+def restart(event=None):
+    global alive,score,enemies
+    for block in enemies:
+        canvas.delete(block)
+    enemies.clear()
+
+    canvas.coords(player, 180, 250, 180+PLAYER_SIZE, 250+PLAYER_SIZE)
+    
+    score = 0
+    canvas.itemconfig(score_text, text="Score: 0")
+    spawn_enemy()
+    spawn_timer = 0
+
+
+    canvas.delete("gameover")
+
+    alive = True
+
+    run_game()
 
 ##BAD GUYS
 def spawn_enemy():
     x = r.randint(0, WIDTH-ENEMY_SIZE)
-    enemy = canvas.create_rectangle(
+    block = canvas.create_rectangle(
     x, 0, x+ENEMY_SIZE, ENEMY_SIZE, fill="cyan")
-    enemies.append(enemy)
+    enemies.append(block)
 
 def run_game():
-    global alive
+    global alive,score
     if not alive:
        canvas.create_text(WIDTH // 2, HEIGHT // 2,text="GAME OVER", fill="white", font=("Arial",24))
        return
-    
-    if r.randint(1,20) == 1:
-       spawn_enemy()
+    score += 1
+    canvas.itemconfig(score_text, text=f"Score: {score}")
 
-    for enemy in enemies:
-       canvas.move(enemy, 0, 10)
+    global spawn_timer
+    spawn_timer += 1
+    if spawn_timer >= 10:
+        spawn_enemy()
+        spawn_timer = 0
+
+    for block in enemies:
+       canvas.move(block, 0, fall_speed)
     
-       if canvas.bbox(enemy) and canvas.bbox(player):
-          ex1, ey1, ex2, ey2 = canvas.bbox(enemy)
+       if canvas.bbox(block) and canvas.bbox(player):
+          bx1, by1, bx2, by2 = canvas.bbox(block)
           px1, py1, px2, py2 = canvas.bbox(player)
 
-          if ex2 < px2 and ex2 > py1 and ey1 < py2 and ey2 > py1:
+          if bx1< px2 and bx2 > px1 and by1 < py2 and by2 > py1:
              alive = False
 
-    root.after(50,run_game)
+          if canvas.bbox(block)[1] > HEIGHT:
+              canvas.delete(block)
+              enemies.remove(block)
+       after_id = root.after(50, run_game)
+
+##BIND BUTTONS
+root.bind("a",move_left)
+root.bind("d",move_right)
+root.bind("w",move_up)
+root.bind("s",move_down)
+root.bind("r",restart)
     
+restart_btn = tk.Button(root, text="Restart", command=restart)
+restart_btn.pack(pady=6)
+
+root.focus_force()
+
 run_game()
 
 root.mainloop()
