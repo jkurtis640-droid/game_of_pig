@@ -45,25 +45,7 @@ def move_down(event=None):
     canvas.move(player, 0, 20)
 
 def restart(event=None):
-    global alive,score,enemies
-    for block in enemies:
-        canvas.delete(block)
-    enemies.clear()
-
-    canvas.coords(player, 180, 250, 180+PLAYER_SIZE, 250+PLAYER_SIZE)
-    
-    score = 0
-    canvas.itemconfig(score_text, text="Score: 0")
-    spawn_enemy()
-    spawn_timer = 0
-
-
-    canvas.delete("gameover")
-
-    alive = True
-
-    run_game()
-
+    global score, block, alive,
 ##BAD GUYS
 def spawn_enemy():
     x = r.randint(0, WIDTH-ENEMY_SIZE)
@@ -99,6 +81,13 @@ def run_game():
               canvas.delete(block)
               enemies.remove(block)
        after_id = root.after(50, run_game)
+
+def restart(event=None):
+    global score, alive, player, block
+    canvas.delete_all()
+    blocks = []
+    alive = True
+    player = canvas.create_rectangle(180, 250, 180 + PLAYER_SIZE, 250 + PLAYER_SIZE, fill="lime")
 
 ##BIND BUTTONS
 root.bind("a",move_left)
