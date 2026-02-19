@@ -41,7 +41,6 @@ def play_game():
     
     players = ["Player 1", "Player 2"]
 
-    valid_choices = {"Roll","Hold"}
     current_index_of_players = 0
     
     while True:
@@ -61,6 +60,9 @@ def play_game():
          current_index = (current_index + 1) % len(players)
 
 play_game()
+
+def get_player_choice():
+    global valid_choices
 
 
        
