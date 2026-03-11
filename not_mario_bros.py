@@ -18,10 +18,13 @@ PLAY_HEIGHT = ROWS * CELL
 enemies = []
 game_over_text = None
 alive = True
+lives = 3
+lives_text = None
+
 pattern = [
           "0000011100000000"
-          "000001111100000"
-          "000111111100000"
+          "0000011111000000"
+          "0001111111000000"
           "0000111111100000"               
           "0001111111110000"
           "0011111111111000"
@@ -51,9 +54,11 @@ player = canvas.create_rectangle(CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (R
 platforms = []
 platform_data = [
     (0, ROWS-2, COLS, ROWS),
-    (3, 13, COLS-3, 14),
-    (5, 9, COLS-5, 10),
-    (7, 5, COLS-7, 6),
+    (2, 16, COLS-2, 17),
+    (7, 13, COLS-7, 14),
+    (2, 10, COLS-2, 11),
+    (7, 7,  COLS-7, 8),
+    (2, 4, COLS-2, 5)
 ]
 def make_platforms(platform_data):
     global platforms
@@ -133,7 +138,7 @@ def check_platform_collision(prev_py2):
                break
            
 def check_enemy_collision():
-    global alive
+    global alive, lives
 
     px1, py1, px2, py2 = canvas.coords(player)
     for e in enemies:
@@ -141,8 +146,22 @@ def check_enemy_collision():
         ex1, ey1, ex2, ey2 = canvas.coords(enemy_id)
         if px2 > ex1 and px1 < ex2:
             if py2 > ey1 and py1 < ey2:
-                alive = False
-                game_over_text = canvas.create_text(PLAY_WIDTH // 2, PLAY_HEIGHT // 2, text="GAME OVER", fill = "white", font=("Arial", 40, "bold"))
+
+                lives -= 1
+                draw_lives()
+
+                if lives > 0:
+                   
+                   canvas.coords((player, CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (ROWS - 3) * CELL + PLAYER_SIZE))
+
+                   PLAYER_DX = 0
+                   PLAYER_DY = 0
+
+                else:
+                    alive = False
+        
+                
+
                 break
             
 
@@ -210,6 +229,23 @@ def restart_game(event=None):
     })
 
 root.bind("<r>",restart_game)
+
+def draw_lives():
+    global lives_text
+
+    if lives_text:
+        canvas.delete(lives_text)
+
+    lives_text = canvas.create_text(
+        60,
+        20,
+        text =f"Lives: {lives}",
+        fill="white",
+        font=("Arial", 16, "bold")
+    )
+
+    
+
 def update():
     global PLAYER_DY, PREV_PY2
     x1, x2, y1, y2 = canvas.coords(player)
@@ -223,6 +259,8 @@ def update():
     move_enemies(enemies)
     wrap_enemies()
     check_enemy_collision()
+    make_platforms(platform_data)
+    draw_lives()
     root.after(40, update)
 
 update()
