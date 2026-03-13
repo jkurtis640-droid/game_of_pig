@@ -1,5 +1,6 @@
 import tkinter as tk
 
+# --- Constants ---
 WIDTH = 800
 HEIGHT = 600
 PLAYER_SIZE = 30
@@ -8,8 +9,10 @@ GRAVITY = 0.5
 JUMP_POWER = 13
 ROWS = 20
 COLS = 26
-CELL = 30 
+CELL = 30
 MOVE_SPEED = 5
+
+# --- Global Variables ---
 PLAYER_DX = 0
 PLAYER_DY = 0
 ON_GROUND = False
@@ -20,50 +23,28 @@ game_over_text = None
 alive = True
 lives = 3
 lives_text = None
-
-pattern = [
-          "0000011100000000"
-          "0000011111000000"
-          "0001111111000000"
-          "0000111111100000"               
-          "0001111111110000"
-          "0011111111111000"
-          "0000111111111100"
-          "0000011111110000"
-          "0000001111100000"
-          "0000001111110000"
-          "0000011111111100"                           
-          "0011111111111110"
-          "0111111111111111"
-          "1111111111110111"
-          "0101111111110010"
-          "0011111111111000"
-          "0011111111111100"
-          "0011110001111000"         
-          "0011100000111000"
-          "0111100000111100"
-           ]                                
-root = tk.Tk()
-root.title("Mario Bros")
-canvas = tk.Canvas(root,width=PLAY_WIDTH,height=PLAY_HEIGHT,bg="black")
-canvas.pack()
-
-player = canvas.create_rectangle(CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (ROWS - 3) * CELL + PLAYER_SIZE, fill="red", outline="")
-
-
+player = None
 platforms = []
+PREV_PY1 = 0
+PREV_PY2 = 0
+
 platform_data = [
     (0, ROWS-2, COLS, ROWS),
     (2, 16, COLS-2, 17),
     (7, 13, COLS-7, 14),
     (2, 10, COLS-2, 11),
-    (7, 7,  COLS-7, 8),
+    (7, 7, COLS-7, 8),
     (2, 4, COLS-2, 5)
 ]
+
+root = tk.Tk()
+root.title("Mario Bros")
+canvas = tk.Canvas(root, width=PLAY_WIDTH, height=PLAY_HEIGHT, bg="black")
+canvas.pack()
+
 def make_platforms(platform_data):
     global platforms
     platforms.clear()
-
     for c1, r1, c2, r2 in platform_data:
         x1 = c1 * CELL
         y1 = r1 * CELL
@@ -72,30 +53,13 @@ def make_platforms(platform_data):
         plat = canvas.create_rectangle(x1, y1, x2, y2, fill="deepskyblue", outline="")
         platforms.append(plat)
 
-        
-    return platforms
-
-enemy = canvas.create_rectangle(
-    10 * CELL, (ROWS - 3) * CELL, 10 * CELL + ENEMY_SIZE, (ROWS - 3) * CELL + ENEMY_SIZE, fill="green", outline=""
-
-)
-    
-enemies.append({
-    "id": enemy,
-    "dx": 2,
-})
-
-
-
 def jump(event):
     global PLAYER_DY
-
     if ON_GROUND:
-       PLAYER_DY = -JUMP_POWER
+        PLAYER_DY = -JUMP_POWER
 
 def key_press(event):
     global PLAYER_DX
-
     if event.keysym == "Left":
         PLAYER_DX = -MOVE_SPEED
     elif event.keysym == "Right":
@@ -103,165 +67,198 @@ def key_press(event):
 
 def key_release(event):
     global PLAYER_DX
-
     if event.keysym in ("Left", "Right"):
-       PLAYER_DX = 0
-root.bind("<KeyPress>",key_press)
-root.bind("<KeyRelease>",key_release)
-root.bind("<Up>",jump)
-make_platforms(platform_data)
-def get_player_coords():
-    return canvas.coords(player)
+        PLAYER_DX = 0
 
-def check_platform_collision(prev_py2):
+root.bind("<KeyPress>", key_press)
+root.bind("<KeyRelease>", key_release)
+root.bind("<Up>", jump)
+
+def flip_enemies_on_platform(platform_id):
+    x1, y1, x2, y2 = canvas.coords(platform_id)
+
+    for e in enemies:
+        enemy_id = e["id"]
+        ex1, ey1, ex2, ey2 = canvas.coords(enemy_id)
+
+        if ex2 > x1 and ex1 < x2:
+            if ey2 >= y1 - CELL and ey2 <= y1 + CELL:
+                e["flipped"] = True
+                e["dx"] = 0
+                canvas.itemconfig(enemy_id, fill="orange")
+                print("enemy flipped")
+def check_platform_collision(prev_py1,prev_py2):
     global PLAYER_DY, ON_GROUND
-
     ON_GROUND = False
 
-    px1, py1, px2, py2 = canvas.coords(player)
+    coords = canvas.coords(player)
+    if not coords:
+        return
     
+    px1, py1, px2, py2 = coords
+
     for plat in platforms:
         x1, y1, x2, y2 = canvas.coords(plat)
 
         if px2 > x1 and px1 < x2:
-           
-           if PLAYER_DY > 0 and prev_py2 is not None and prev_py2 <= y1 and py2 >= y1:
-               canvas.move(player, 0, y1 - py2)
-               PLAYER_DY = 0
-               ON_GROUND = True
-               break
-           
-           if py2 > y1 and py2 < y1 + 5:
-               canvas.move(player, 0, y1 - py2)
-               PLAYER_DY = 0
-               ON_GROUND = True
-               break
-           
-def check_enemy_collision():
-    global alive, lives
 
-    px1, py1, px2, py2 = canvas.coords(player)
-    for e in enemies:
+            if PLAYER_DY > 0:
+                if prev_py2 <= y1 and py2 >= y1:
+                    canvas.move(player, 0, y1 - py2)
+                    PLAYER_DY = 0
+                    ON_GROUND = True
+                    break
+
+
+                if py2 > y1 and py2 < y1 + 10:
+                    canvas.move(player, 0, y1 - py2)
+                    PLAYER_DY = 0
+                    ON_GROUND = True
+                    break
+
+            elif PLAYER_DY < 0:
+                 if prev_py1 >= y2 and py1 <= y2:
+                    canvas.move(player, 0, y2 - py1)
+                    PLAYER_DY = 0
+                    break
+
+
+def check_enemy_collision():
+    global alive, lives, PLAYER_DX, PLAYER_DY, player
+    
+    p_coords = canvas.coords(player)
+    if not p_coords: return
+    px1, py1, px2, py2 = p_coords
+    
+    for e in enemies[:]:
+        if e.get("flipped"):
+            continue
         enemy_id = e["id"]
         ex1, ey1, ex2, ey2 = canvas.coords(enemy_id)
-        if px2 > ex1 and px1 < ex2:
-            if py2 > ey1 and py1 < ey2:
-
-                lives -= 1
-                draw_lives()
-
-                if lives > 0:
-                   
-                   canvas.coords((player, CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (ROWS - 3) * CELL + PLAYER_SIZE))
-
-                   PLAYER_DX = 0
-                   PLAYER_DY = 0
-
-                else:
-                    alive = False
         
-                
+        if px2 > ex1 and px1 < ex2 and py2 > ey1 and py1 < ey2:
+            lives -= 1
+            draw_lives()
+            if lives > 0:
+                # Reset player position
+                canvas.coords(player, CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (ROWS - 3) * CELL + PLAYER_SIZE)
+                PLAYER_DX = 0
+                PLAYER_DY = 0
+            else:
+                alive = False
+                canvas.create_text(PLAY_WIDTH/2, PLAY_HEIGHT/2, text="GAME OVER", fill="white", font=("Arial", 30))
+            break
 
-                break
-            
-
-def move_enemies(e):
+def check_enemy_platform_collision():
     for e in enemies:
+         enemy_id = e["id"]
+         ex1, ey1, ex2, ey2 = canvas.coords(enemy_id)
+
+         for plat in platforms:
+             x1, y1, x2, y2 = canvas.coords(plat)
+
+             if ex2 > x1 and ex1 < x2:
+                 if ey2 >= y1 and ey2 <= y1 + 10 and e["dy"] >= 0:
+                    canvas.move(enemy_id, 0, y1 - ey2)
+                    e["dy"] = 0
+                    break
+def move_enemies():
+    for e in enemies:
+        if e.get("flipped"):
+            continue
+
         enemy_id = e["id"]
         dx = e["dx"]
+        dy = e["dy"]
+        e["dy"] += GRAVITY
 
-        canvas.move(enemy_id, dx, 0)
-
-        
+        canvas.move(enemy_id,dx,dy)
 
 def wrap_player():
     x1, y1, x2, y2 = canvas.coords(player)
-
     if x2 < 0:
-        canvas.move(player, PLAY_WIDTH - x2, 0)
-
+        canvas.move(player, PLAY_WIDTH, 0)
     elif x1 > PLAY_WIDTH:
-        canvas.move(player, -x1, 0)
+        canvas.move(player, -PLAY_WIDTH, 0)
 
 def wrap_enemies():
     for e in enemies:
         enemy_id = e["id"]
-
         x1, y1, x2, y2 = canvas.coords(enemy_id)
         if x2 < 0:
-            canvas.move(enemy_id, PLAY_WIDTH - x2,0)
-
+            canvas.move(enemy_id, PLAY_WIDTH + ENEMY_SIZE, 0)
         elif x1 > PLAY_WIDTH:
-            canvas.move(enemy_id, -x1, 0)
-
-def restart_game(event=None):
-    global player, enemies, platforms
-    global PLAYER_DX, PLAYER_DY, ON_GROUND
-    global alive, game_over_text
-
-    canvas.delete("all")
-
-    enemies.clear()
-    platforms.clear()
-
-    PLAYER_DX = 0
-    PLAYER_DY = 0
-    ON_GROUND = False
-
-    alive = True
-
-    game_over_text = None
-
-    player_x = CELL
-    player_y = (ROWS - 3) * CELL
-
-    player_id = canvas.create_rectangle(player_x, player_y, player_x + PLAYER_SIZE, player_y + PLAYER_SIZE, fill="red",outline="")\
-    
-    globals()["player"] = player_id
-
-    make_platforms(platform_data)
-
-    enemy = canvas.create_rectangle(10 * CELL, (ROWS - 3) * CELL, 10 * CELL + ENEMY_SIZE, (ROWS - 3) * CELL + ENEMY_SIZE, fill="green",outline="")
-
-    enemies.append({ 
-        "id": enemy,
-        "dx": 2
-    })
-
-root.bind("<r>",restart_game)
+            canvas.move(enemy_id, -PLAY_WIDTH - ENEMY_SIZE, 0)
 
 def draw_lives():
     global lives_text
-
     if lives_text:
         canvas.delete(lives_text)
-
     lives_text = canvas.create_text(
-        60,
-        20,
-        text =f"Lives: {lives}",
-        fill="white",
-        font=("Arial", 16, "bold")
+        60, 20, text=f"Lives: {lives}", fill="white", font=("Arial", 16, "bold")
     )
 
+def spawn_shellcreeper(x_col, y_row):
+    x = x_col * CELL
+    y = y_row * CELL
+
+    enemy = canvas.create_rectangle(
+        x, y, x + ENEMY_SIZE, y + ENEMY_SIZE, fill="green", outline=""
+    )
+    enemies.append({
+        "id": enemy,
+        "dx": 2,
+        "dy": 0,
+        "flipped": False
+    })
+
+def restart_game(event=None):
+    global player, enemies, platforms, lives
+    global PLAYER_DX, PLAYER_DY, ON_GROUND, alive, lives_text
     
+    canvas.delete("all")
+    enemies.clear()
+    platforms.clear()
+    
+    PLAYER_DX = 0
+    PLAYER_DY = 0
+    ON_GROUND = False
+    alive = True
+    lives = 3
+    
+    player = canvas.create_rectangle(CELL, (ROWS - 3) * CELL, CELL + PLAYER_SIZE, (ROWS - 3) * CELL + PLAYER_SIZE, fill="red", outline="")
+    
+    make_platforms(platform_data)
+    spawn_shellcreeper(8, 1)
+    spawn_shellcreeper(3, 12)
+    draw_lives()
+
 
 def update():
     global PLAYER_DY, PREV_PY2
-    x1, x2, y1, y2 = canvas.coords(player)
-    PREV_PY2 = y2
-    PLAYER_DY += GRAVITY
+    
+    if not alive:
+        return
 
+    coords = canvas.coords(player)
+    if not coords: return
+    
+    x1, y1, x2, y2 = coords
+    PREV_PY2 = y2
+    
+    PLAYER_DY += GRAVITY
     canvas.move(player, PLAYER_DX, PLAYER_DY)
-     
-    check_platform_collision(PREV_PY2)
+    
+    check_platform_collision(PREV_PY1,PREV_PY2)
     wrap_player()
-    move_enemies(enemies)
+    move_enemies()
     wrap_enemies()
     check_enemy_collision()
-    make_platforms(platform_data)
-    draw_lives()
-    root.after(40, update)
+    check_enemy_platform_collision()
+    flip_enemies_on_platform(platform_id)
+    root.after(30, update)
 
+# Initialize
+restart_game()
 update()
 root.mainloop()
