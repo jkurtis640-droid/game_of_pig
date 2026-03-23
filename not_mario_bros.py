@@ -6,7 +6,7 @@ HEIGHT = 600
 PLAYER_SIZE = 30
 ENEMY_SIZE = 25
 GRAVITY = 0.5
-JUMP_POWER = 13
+JUMP_POWER = 15
 ROWS = 20
 COLS = 26
 CELL = 30
@@ -82,7 +82,7 @@ root.bind("<Up>", jump)
 
 
 def flip_enemies_on_platform(plat):
-    global flipped
+    global flipped, enemy_dx
     x1, y1, x2, y2 = canvas.bbox(plat)
     
     for e in enemies:
@@ -90,10 +90,11 @@ def flip_enemies_on_platform(plat):
         ex1, ey1, ex2, ey2 = canvas.bbox(enemy_id)
 
         if ex2 > x1 and ex1 < x2:
-            if ey2 >= y1 - CELL and ey2 <= y1 + CELL:
-                e["flipped"] = True 
+            if ey2 >= y1 + CELL and ey2 <= y1 - CELL:
+                flipped = True 
+                enemy_dx *= -1 
                 canvas.itemconfig(enemy_id, fill="orange")
-                print("enemy flipped")
+                
 
 def check_platform_collision(prev_py1,prev_py2):
     global PLAYER_DY, ON_GROUND
