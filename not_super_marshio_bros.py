@@ -5,9 +5,16 @@ HEIGHT = 400
 CELL = 16
 ROWS = WIDTH / CELL
 COLS = HEIGHT / CELL
+PLAYER_SIZE = 16
+ground_top = HEIGHT - (CELL*2)
+x = WIDTH // 2
+y = ground_top - PLAYER_SIZE
+dx = 0
+dy = 0
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
+new_platforms = canvas.create_rectangle(0, ground_top , 100+(CELL * 2) , (HEIGHT * 2),  fill="brown")
 canvas.pack()
 
 
@@ -21,12 +28,17 @@ def create_platforms():
     for p in platforms:
         for c in CELL:
             if platforms == 1:
-                x1, y1, x2, y2 = canvas.bbox(platforms)
-                platforms = canvas.create_rectangle(100, 100, 132, 132,  fill="brown")
+                x1, y1, x2, y2 = canvas.create_rectangle(platforms)
                 platforms.append(p)
 
+def create_player():
+    global x, y, dx, dy
+    player = canvas.create_rectangle(x, y, x + PLAYER_SIZE, y + PLAYER_SIZE, fill="red", outline="")
+    
 def game_loop():
     root.after(16, game_loop)
+    create_platforms()
+    create_player()
     
 root.mainloop()
     
