@@ -23,11 +23,13 @@ def create_platforms():
     platforms = [
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1]
     ]
 
+    platforms = [0,0,0,1,0]
+
     for p in platforms:
-        for c in range(0, CELL):
+        
             if platforms == 1:
                 x1, y1, x2, y2 = canvas.create_rectangle(platforms)
                 platforms.append(p)
