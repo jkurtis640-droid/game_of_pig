@@ -11,6 +11,7 @@ x = WIDTH // 14 - PLAYER_SIZE // 14
 y = ground_top - PLAYER_SIZE
 dx = 0
 dy = 0
+SPEED = 5
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -31,18 +32,25 @@ def create_platforms():
                 x1, y1, x2, y2 = canvas.create_rectangle(platforms)
                 platforms.append(p)
 
+
 def create_player():
-    global x, y, dx, dy
+    global x,y,PLAYER_SIZE
     player = canvas.create_rectangle(x, y, x+PLAYER_SIZE, y+PLAYER_SIZE, fill="red")
-    
     
 def game_loop():
     
     create_platforms()
-    create_player()
     root.after(16, game_loop)
 
+def move_left(event):
+    canvas.move(player, -15, 0)
+def move_right(event):
+    canvas.move(player, 15, 0)
 
+root.bind("<Left>", move_left)
+root.bind("<Right>",move_right)
+create_platforms()
+create_player()
 game_loop()
 root.mainloop()
     
