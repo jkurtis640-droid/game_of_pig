@@ -14,7 +14,7 @@ dy = 0
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
-new_platforms = canvas.create_rectangle(0, ground_top , 100+(CELL * 2) , (HEIGHT * 2),  fill="blue")
+new_platforms = canvas.create_rectangle(0, ground_top , 100+(CELL * 2) , (HEIGHT * 2),  fill="brown")
 canvas.pack()
 
 
