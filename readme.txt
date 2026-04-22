@@ -1,0 +1,3 @@
+1. The Game is called Mario Bros.
+2. The Controls are left arrow to go left, eight arrow to go right, up arrow to jump, r to restart.
+3. The Game works by first you spawn in to the bottom left corner of the screen. After that you can move around and jump onto platforms. You can warp around to the other part of the screen. Finally there are enemies that move right and if you get hit by them you die.
