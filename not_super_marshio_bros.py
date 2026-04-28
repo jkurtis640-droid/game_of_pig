@@ -1,5 +1,8 @@
 import tkinter as tk
-from pillow import Image, ImageTk
+
+from PIL import Image, ImageTk
+
+im =  Image.open("hopper.ppm")
 WIDTH = 400
 HEIGHT = 400
 CELL = 16
