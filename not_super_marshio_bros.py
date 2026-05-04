@@ -17,7 +17,6 @@ dy = 0
 SPEED = 5
 GRAVITY = 0.5
 ON_GROUND = False
-MOVE_SPEED = 5
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
