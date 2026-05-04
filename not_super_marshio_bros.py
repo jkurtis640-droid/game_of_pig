@@ -17,6 +17,7 @@ dy = 0
 SPEED = 5
 GRAVITY = 0.5
 ON_GROUND = False
+JUMP_POWER = 5
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -86,6 +87,9 @@ def move_left(event):
 def move_right(event):
     global player
     canvas.move(player, 15, 0)
+
+def jump(event):
+
 
 
 
