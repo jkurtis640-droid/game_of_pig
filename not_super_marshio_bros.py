@@ -16,6 +16,7 @@ dx = 0
 dy = 0
 SPEED = 5
 GRAVITY = 0.5
+ON_GROUND = False
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -50,11 +51,33 @@ def create_player():
     player = canvas.create_rectangle(x, y, x+PLAYER_SIZE, y+PLAYER_SIZE, fill="red")
     
     return player
+
+player = create_player()
+
+def check_ground_collision(player):
+    #global player
+    coords = canvas.coords(player)
+
+    ## Gridmap of player
+    x1 = coords[0]
+    y1 = coords[1]
+    x2 = coords[2]
+    y2 = coords[3]
     
+    ## Ground collision code
+    if  coords[3] >= ground_top:
+       ## adds player to the top of the ground to the bottom of the player
+       player += (ground_top-y2)
+       dy = 0
+       coords[3]=0
+       on_ground = True
+    else:
+       on_ground = False
 def game_loop():
-    global dy, player
-    dy += GRAVITY
+    global y, player
+    y += GRAVITY
     canvas.move(player, 0, dy)
+    check_ground_collision(player)
     root.after(16, game_loop)
 
 def move_left(event):
@@ -69,7 +92,9 @@ def move_right(event):
 root.bind("<Left>", move_left)
 root.bind("<Right>",move_right)
 create_platforms()
-player = create_player()
+
+## check_ground_collision()
 game_loop()
+
 root.mainloop()
     
