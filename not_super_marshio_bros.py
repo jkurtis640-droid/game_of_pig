@@ -16,7 +16,9 @@ dx = 0
 dy = 0
 SPEED = 5
 GRAVITY = 0.5
-ON_GROUND = False
+ON_GROUND = True
+JUMP_POWER = -10
+PLAYER_DY = 0
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -29,7 +31,6 @@ resized_img = original_img.resize((50,50))
 sprite_photo = ImageTk.PhotoImage(resized_img)
 
 sprite_id = canvas.create_image(x, y, image=sprite_photo, anchor="nw")
-
 canvas.sprite_photo = sprite_photo
 def create_platforms():
     platforms = [
@@ -55,7 +56,7 @@ def create_player():
 player = create_player()
 
 def check_ground_collision(player):
-    #global player
+    global ON_GROUND
     coords = canvas.coords(player)
 
     ## Gridmap of player
@@ -67,15 +68,14 @@ def check_ground_collision(player):
     ## Ground collision code
     if  coords[3] >= ground_top:
        ## adds player to the top of the ground to the bottom of the player
-       player += (ground_top-y2)
+       canvas.move(player, 0, ground_top - coords[3])
        dy = 0
-       coords[3]=0
-       on_ground = True
+       ON_GROUND = True
     else:
-       on_ground = False
+       ON_GROUND = False
 def game_loop():
-    global y, player
-    y += GRAVITY
+    global dy, player
+    dy += GRAVITY
     canvas.move(player, 0, dy)
     check_ground_collision(player)
     root.after(16, game_loop)
@@ -88,10 +88,19 @@ def move_right(event):
     global player
     canvas.move(player, 15, 0)
 
+
+def jump(event):
+    global ON_GROUND, JUMP_POWER, dy
+    if ON_GROUND:
+       dy = JUMP_POWER
+       ON_GROUND = False
+       
 root.bind("<Left>",move_left)
 root.bind("<Right>",move_right)
-create_platforms()
 
+root.bind("<Up>",jump)
+
+create_platforms()
 ## check_ground_collision()
 game_loop()
 
