@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 
 WIDTH = 400
 HEIGHT = 400
+ROWS = 24
 CELL = 16
 ROWS = WIDTH / CELL
 COLS = HEIGHT / CELL
@@ -19,6 +20,7 @@ GRAVITY = 0.5
 ON_GROUND = True
 JUMP_POWER = -10
 PLAYER_DY = 0
+platforms = []
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -34,18 +36,17 @@ sprite_id = canvas.create_image(x, y, image=sprite_photo, anchor="nw")
 canvas.sprite_photo = sprite_photo
 def create_platforms():
     platforms = [
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1]
+        [0, 500, 400, 400],
+        [50, 280, 200, 295],
+        [200, 220, 300, 235],
+        [300, 200, 400, 215],
+        #[x1, y1, x2, y2]
     ]
 
-    platforms = [0,0,0,1,0]
+    
 
-    for p in platforms:
-            if platforms == 1:
-                x1, y1, x2, y2 = canvas.create_rectangle(platforms)
-                platforms.append(p)
-
+    for coord in platforms:
+        p_id = canvas.create_rectangle(coord[0], coord[1], coord[2], coord[3], fill="brown")
 
 def create_player():
     global x,y,PLAYER_SIZE
