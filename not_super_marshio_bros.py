@@ -18,7 +18,7 @@ dy = 0
 SPEED = 5
 GRAVITY = 0.5
 ON_GROUND = True
-JUMP_POWER = -10
+JUMP_POWER = -11
 PLAYER_DY = 0
 platforms = []
 root = tk.Tk()
@@ -74,11 +74,47 @@ def check_ground_collision(player):
        ON_GROUND = True
     else:
        ON_GROUND = False
+
+def check_platform_collision():
+    ON_GROUND = False
+    ## for plat in platforms:
+    
+    coords = canvas.bbox(player)
+    px1, py1, px2, py2 = coords
+
+    for plat in platforms:
+        x1, y1, x2, y2 = canvas.bbox(plat)
+        ## Checks if player is on the platform
+        if px2 > x1 and px1 < x2:
+            
+            if PLAYER_DY > 0:
+                if py2 <= y1 and py2 >= y1:
+                    canvas.move(player, 0, y1 - py2)
+                    PLAYER_DY = 0
+                    ON_GROUND = True
+                    break
+
+                if py2 > y1 and py2 < y1 + 10:
+                    canvas.move(player, 0, y1 - py2)
+                    PLAYER_DY = 0
+                    ON_GROUND = True
+                    break
+
+            else:
+                if py1 >= y2 and py1 <= y2:
+                   canvas.move(player, 0, y2 - py1)
+                   PLAYER_DY = 0
+                   break
+            
+                
+
+
 def game_loop():
     global dy, player
     dy += GRAVITY
     canvas.move(player, 0, dy)
     check_ground_collision(player)
+    check_platform_collision()
     root.after(16, game_loop)
 
 def move_left(event):
