@@ -37,7 +37,8 @@ sprite_photo = ImageTk.PhotoImage(resized_img)
 sprite_id = canvas.create_image(x, y, image=sprite_photo, anchor="nw")
 canvas.sprite_photo = sprite_photo
 def create_platforms():
-    platforms = [
+    global platforms
+    platform_data = [
         [0, 500, 400, 400],
         [50, 280, 200, 295],
         [200, 220, 300, 235],
@@ -45,10 +46,13 @@ def create_platforms():
         #[x1, y1, x2, y2]
     ]
 
+    for coords in platform_data:
+         
+        p_id = canvas.create_rectangle(coords[0], coords[1], coords[2], coords[3], fill="brown")
+        platforms.append(p_id)
+
     
 
-    for coord in platforms:
-        p_id = canvas.create_rectangle(coord[0], coord[1], coord[2], coord[3], fill="brown")
         
 def create_player():
     global x,y,PLAYER_SIZE
@@ -90,6 +94,11 @@ def check_platform_collision():
                 ON_GROUND = True
                 return
                 
+        if py2 > x2 and py1 < x1:
+            canvas.move(player, 0, y1 - py2)
+            PLAYER_DY = 0
+            ON_GROUND = True
+            
 
 
 def game_loop():
