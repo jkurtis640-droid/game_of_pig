@@ -98,7 +98,7 @@ def check_platform_collision():
             canvas.move(player, 0, y1 - py2)
             PLAYER_DY = 0
             ON_GROUND = True
-            
+            return
 
 
 def game_loop():
