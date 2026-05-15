@@ -20,13 +20,13 @@ GRAVITY = 0.5
 ON_GROUND = True
 JUMP_POWER = -10
 PLAYER_DY = 0
-ENEMY_SIZE = 32
+ENEMY_SIZE = 16
 platforms = []
 goombas = []
 prev_py1 = 0
 prev_py2 = 0
-x_col = 0
-y_row = 0
+x_col = 20
+y_row = 44
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -116,8 +116,8 @@ def check_platform_collision():
                 
        
 def create_goomba(x_col, y_row):
-    x = x_col * CELL
-    y = y_row * CELL
+    x = x_col * CELL//2
+    y = y_row * CELL//2
 
     goomba = canvas.create_rectangle(
         x, y, x + ENEMY_SIZE, y + ENEMY_SIZE, fill="brown", outline=""
