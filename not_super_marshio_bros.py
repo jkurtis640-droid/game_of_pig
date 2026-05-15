@@ -18,10 +18,11 @@ dy = 0
 SPEED = 5
 GRAVITY = 0.5
 ON_GROUND = True
-JUMP_POWER = -11
+JUMP_POWER = -10
 PLAYER_DY = 0
 ENEMY_SIZE = 32
 platforms = []
+goombas = []
 prev_py1 = 0
 prev_py2 = 0
 x_col = 0
@@ -118,12 +119,12 @@ def create_goomba(x_col, y_row):
     x = x_col * CELL
     y = y_row * CELL
 
-    enemy_1 = canvas.create_rectangle(
+    goomba = canvas.create_rectangle(
         x, y, x + ENEMY_SIZE, y + ENEMY_SIZE, fill="brown", outline=""
     )
 
-    enemy_1.append = ({
-        "id": enemy_1,
+    goombas.append({
+        "id": goomba,
         "dx": 2,
         "dy": 0,
     })
