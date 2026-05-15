@@ -20,9 +20,12 @@ GRAVITY = 0.5
 ON_GROUND = True
 JUMP_POWER = -11
 PLAYER_DY = 0
+ENEMY_SIZE = 32
 platforms = []
 prev_py1 = 0
 prev_py2 = 0
+x_col = 0
+y_row = 0
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -80,25 +83,50 @@ def check_ground_collision(player):
 def check_platform_collision():
     global ON_GROUND, PLAYER_DY
     p_coords = canvas.coords(player)
-    px1, px2, py1, py2 = p_coords[0], p_coords[1], p_coords[2], p_coords[3]
+    if not p_coords:
+        return
+        
+    px1, py1, px2, py2 = p_coords[0], p_coords[1], p_coords[2], p_coords[3]
     
     for plat in platforms:
         plat_coords = canvas.coords(plat)
         x1, y1, x2, y2 = plat_coords[0], plat_coords[1], plat_coords[2], plat_coords[3]
-
-        # checks if player is on the platform
+        
+        # Check if player is horizontally overlapping the platform
         if px2 > x1 and px1 < x2:
+            # Check if landing from above
             if PLAYER_DY >= 0 and py2 <= y1 and (py2 + PLAYER_DY) >= y1:
                 canvas.move(player, 0, y1 - py2)
                 PLAYER_DY = 0
                 ON_GROUND = True
                 return
+            
+            if py2 > y1 and py2 < y1 + 10:
+                canvas.move(player, 0, y1 - py2)
+                PLAYER_DY = 0
+                ON_GROUND = True
+                return
+            
+            elif PLAYER_DY < 0:
+                if prev_py1 >= y2 and py1 <= y2:
+                   canvas.move(player, 0, y2 - py1)
+                   PLAYER_DY = 0
+                   return
                 
-        if py2 > x2 and py1 < x1:
-            canvas.move(player, 0, y1 - py2)
-            PLAYER_DY = 0
-            ON_GROUND = True
-            return
+       
+def create_goomba(x_col, y_row):
+    x = x_col * CELL
+    y = y_row * CELL
+
+    enemy_1 = canvas.create_rectangle(
+        x, y, x + ENEMY_SIZE, y + ENEMY_SIZE, fill="brown", outline=""
+    )
+
+    enemy_1.append = ({
+        "id": enemy_1,
+        "dx": 2,
+        "dy": 0,
+    })
 
 
 def game_loop():
@@ -107,6 +135,7 @@ def game_loop():
     canvas.move(player, 0, PLAYER_DY)
     check_ground_collision(player)
     check_platform_collision()
+    create_goomba(x_col,y_row)
     root.after(16, game_loop)
 
 def move_left(event):
@@ -130,6 +159,7 @@ root.bind("<Right>",move_right)
 root.bind("<Up>",jump)
 
 create_platforms()
+
 ## check_ground_collision()
 check_platform_collision()
 game_loop()
