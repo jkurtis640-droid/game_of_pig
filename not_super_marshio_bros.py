@@ -132,19 +132,21 @@ def create_goomba(x_col, y_row):
 
 def check_goomba_platform_collision():
     for g in goombas:
-        ON_GROUND = False
+        g["ON_GROUND"]= False
         goomba_id = g["id"]
         gx1, gy1, gx2, gy2 = canvas.bbox(goomba_id)
+        prev_gy2 = g.get("prev_py2",gy2)
         for plat in platforms:
             x1, y1, x2, y2 = canvas.bbox(plat)
             ## Check Horizontal Overlap
             if gx2 >= x1 and gx1 <= x2:
                 ## Checks old bottom was above platform top and new bottom was above platform top.
-                if prev_gy2 >= y1 and gy2 <= y1 + 10:
+                if prev_gy2 <= y1 and gy2 >= y1:
                     canvas.move(goomba_id, 0, y1 - gy2)
                     g["dy"] = 0
-                    ON_GROUND = True
+                    g["ON_GROUND"] = True
                     break
+
 
 def game_loop():
     global PLAYER_DY, player
@@ -154,6 +156,7 @@ def game_loop():
     check_platform_collision()
     create_goomba(x_col,y_row)
     check_goomba_platform_collision()
+    
     root.after(16, game_loop)
 
 def move_left(event):
