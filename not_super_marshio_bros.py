@@ -27,6 +27,7 @@ prev_py1 = 0
 prev_py2 = 0
 x_col = 20
 y_row = 44
+prev_gy2 = 0
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -129,6 +130,21 @@ def create_goomba(x_col, y_row):
         "dy": 0,
     })
 
+def check_goomba_platform_collision():
+    for g in goombas:
+        ON_GROUND = False
+        goomba_id = g["id"]
+        gx1, gy1, gx2, gy2 = canvas.bbox(goomba_id)
+        for plat in platforms:
+            x1, y1, x2, y2 = canvas.bbox(plat)
+            ## Check Horizontal Overlap
+            if gx2 >= x1 and gx1 <= x2:
+                ## Checks old bottom was above platform top and new bottom was above platform top.
+                if prev_gy2 >= y1 and gy2 <= y1 + 10:
+                    canvas.move(goomba_id, 0, y1 - gy2)
+                    g["dy"] = 0
+                    ON_GROUND = True
+                    break
 
 def game_loop():
     global PLAYER_DY, player
@@ -137,6 +153,7 @@ def game_loop():
     check_ground_collision(player)
     check_platform_collision()
     create_goomba(x_col,y_row)
+    check_goomba_platform_collision()
     root.after(16, game_loop)
 
 def move_left(event):
