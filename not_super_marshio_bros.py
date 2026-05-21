@@ -15,20 +15,26 @@ x = WIDTH // 14 - PLAYER_SIZE // 14
 y = ground_top - PLAYER_SIZE
 dx = 0
 dy = 0
-SPEED = 5
+SPEED = 1
 GRAVITY = 0.5
 ON_GROUND = True
 JUMP_POWER = -10
+PLAYER_DX = 0
 PLAYER_DY = 0
 ENEMY_SIZE = 16
+PLAY_WIDTH = COLS * CELL
+PLAY_HEIGHT = ROWS * CELL
 platforms = []
 goombas = []
 enemies = []
+alive = True
+lives = 3
 prev_py1 = 0
 prev_py2 = 0
 x_col = 20
 y_row = 44
 prev_gy2 = 0
+lives_text = None
 root = tk.Tk()
 root.title("Super Marshio Bros")
 canvas = tk.Canvas(root,width=WIDTH,height=HEIGHT, bg="black")
@@ -117,6 +123,13 @@ def check_platform_collision():
                    return
                 
        
+def draw_lives():
+    global lives_text
+    if lives_text:
+        canvas.delete(lives_text)
+    lives_text = canvas.create_text(
+        60, 20, text=f"Lives: {lives}", fill="white", font=("Times New Roman", 16, "bold")
+    )
 def create_goomba(x_col, y_row):
     x = x_col * CELL//2
     y = y_row * CELL//2
@@ -163,6 +176,54 @@ def move_goombas():
         gx1, gy1, gx2, gy2 = canvas.coords(goomba_id)
         g["prev_gy2"] = gy2
 
+def goomba_collision_with_player():
+    global alive, lives, PLAYER_DX, PLAYER_DY
+
+    p_coords = canvas.bbox(player)
+    if not p_coords:
+        return
+    
+    px1, py1, px2, py2 = p_coords 
+    for g in goombas[:]:
+        goomba_id = g["id"]
+        g_coords = canvas.bbox(goomba_id)
+        if not g_coords:
+            continue
+ 
+
+        gx1, gy1, gx2, gy2 = g_coords
+        ## Check if the player and goomba are overlapping
+        if px2 > gx1 and px1 < gx2 and py2 > gy1 and py1 < gy2:
+            # Check if it is a stomp
+            if PLAYER_DY >= 0 and (py2 - gy1) <= 10:
+               canvas.delete(goomba_id)
+               goombas.remove(g)
+               PLAYER_DY = -6
+            # Otherwise it took damage from the bottom
+            elif lives > 0:
+                lives -= 1
+                draw_lives()
+                if lives > 0:
+                    # Reset Position
+                    canvas.coords(
+                        player,
+                        CELL,
+                        (ROWS-3) * CELL,
+                        CELL + PLAYER_SIZE,
+                        (ROWS-3) * CELL + PLAYER_SIZE
+                    )
+                    PLAYER_DX = 0
+                    PLAYER_DY = 0
+            else:
+                alive = False
+                canvas.create_text(
+                    PLAY_WIDTH/2,
+                    PLAY_HEIGHT/2,
+                    text="GAME OVER",
+                    fill="white",
+                    font=("Times New Roman", 30)
+                )
+            break
 def game_loop():
     global PLAYER_DY, player, goomba_id
     PLAYER_DY += GRAVITY
@@ -170,7 +231,8 @@ def game_loop():
     check_ground_collision(player)
     check_platform_collision()
     move_goombas()
-    check_goomba_platform_collision()    
+    check_goomba_platform_collision()  
+    goomba_collision_with_player()
     root.after(16, game_loop)
 
 def move_left(event):

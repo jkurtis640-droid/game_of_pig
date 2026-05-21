@@ -221,7 +221,7 @@ def check_enemy_platform_collision():
                     enemy_dy = 0
                     break
 """
-'''def check_enemy_platform_collision():
+def check_enemy_platform_collision():
     for e in enemies:
         enemy_id = e["id"]
         ex1, ey1, ex2, ey2 = canvas.bbox(enemy_id)
@@ -234,7 +234,6 @@ def check_enemy_platform_collision():
                     canvas.move(enemy_id, 0, y1 - ey2)
                     e["dy"] = 0
                     break
-'''
 def move_enemies():
     global dx, dy
     for e in enemies:
@@ -331,7 +330,7 @@ def update():
     move_enemies()
     wrap_enemies()
     check_enemy_collision()
-    ### check_enemy_platform_collision()
+    check_enemy_platform_collision()
     for plat in platforms:
         flip_enemies_on_platform(plat)
     root.after(30, update)
