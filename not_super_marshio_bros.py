@@ -23,6 +23,7 @@ PLAYER_DY = 0
 ENEMY_SIZE = 16
 platforms = []
 goombas = []
+enemies = []
 prev_py1 = 0
 prev_py2 = 0
 x_col = 20
@@ -126,7 +127,7 @@ def create_goomba(x_col, y_row):
 
     goombas.append({
         "id": goomba,
-        "dx": 2,
+        "dx": -2,
         "dy": 0,
     })
 
@@ -134,10 +135,16 @@ def check_goomba_platform_collision():
     for g in goombas:
         g["ON_GROUND"]= False
         goomba_id = g["id"]
-        gx1, gy1, gx2, gy2 = canvas.bbox(goomba_id)
+        gx1, gy1, gx2, gy2 = canvas.coords(goomba_id)
         prev_gy2 = g.get("prev_py2",gy2)
+        if gy2 >= ground_top:
+            canvas.move(goomba_id, 0, ground_top - gy2)
+            g["dy"] = 0
+            g["ON_GROUND"] = True
+            continue
+        
         for plat in platforms:
-            x1, y1, x2, y2 = canvas.bbox(plat)
+            x1, y1, x2, y2 = canvas.coords(plat)
             ## Check Horizontal Overlap
             if gx2 >= x1 and gx1 <= x2:
                 ## Checks old bottom was above platform top and new bottom was above platform top.
@@ -147,16 +154,23 @@ def check_goomba_platform_collision():
                     g["ON_GROUND"] = True
                     break
 
+def move_goombas():
+    for g in goombas:
+        goomba_id = g["id"]
+        ## applies gravity 
+        g["dy"] += GRAVITY
+        canvas.move(goomba_id, g["dx"], g["dy"])
+        gx1, gy1, gx2, gy2 = canvas.coords(goomba_id)
+        g["prev_gy2"] = gy2
 
 def game_loop():
-    global PLAYER_DY, player
+    global PLAYER_DY, player, goomba_id
     PLAYER_DY += GRAVITY
     canvas.move(player, 0, PLAYER_DY)
     check_ground_collision(player)
     check_platform_collision()
-    create_goomba(x_col,y_row)
-    check_goomba_platform_collision()
-    
+    move_goombas()
+    check_goomba_platform_collision()    
     root.after(16, game_loop)
 
 def move_left(event):
@@ -180,7 +194,7 @@ root.bind("<Right>",move_right)
 root.bind("<Up>",jump)
 
 create_platforms()
-
+create_goomba(x_col, y_row) # Create a Goomba once at the start
 ## check_ground_collision()
 check_platform_collision()
 game_loop()
