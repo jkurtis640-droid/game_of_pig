@@ -224,6 +224,8 @@ def goomba_collision_with_player():
                     font=("Times New Roman", 30)
                 )
             break
+
+    
 def game_loop():
     global PLAYER_DY, player, goomba_id
     PLAYER_DY += GRAVITY
