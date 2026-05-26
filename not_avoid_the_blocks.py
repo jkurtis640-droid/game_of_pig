@@ -45,7 +45,7 @@ def move_down(event=None):
     canvas.move(player, 0, 20)
 
 def restart(event=None):
-    global score, block, alive,
+    global score, block, alive
 ##BAD GUYS
 def spawn_enemy():
     x = r.randint(0, WIDTH-ENEMY_SIZE)

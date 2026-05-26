@@ -21,6 +21,8 @@ ON_GROUND = True
 JUMP_POWER = -10
 PLAYER_DX = 0
 PLAYER_DY = 0
+GOOMBA_DX = 0
+GOOMBA_DY = 0
 ENEMY_SIZE = 16
 PLAY_WIDTH = COLS * CELL
 PLAY_HEIGHT = ROWS * CELL
@@ -32,7 +34,8 @@ lives = 3
 prev_py1 = 0
 prev_py2 = 0
 x_col = 20
-y_row = 44
+y_row = (ground_top // CELL) - 1  # Formats directly above ground level
+prev_gy1 = 0
 prev_gy2 = 0
 lives_text = None
 root = tk.Tk()
@@ -130,12 +133,18 @@ def draw_lives():
     lives_text = canvas.create_text(
         60, 20, text=f"Lives: {lives}", fill="white", font=("Times New Roman", 16, "bold")
     )
-def create_goomba(x_col, y_row):
-    x = x_col * CELL//2
-    y = y_row * CELL//2
+def create_goomba(col, row):
+    gx1 = col * CELL
+    gy1 = row * CELL
 
     goomba = canvas.create_rectangle(
-        x, y, x + ENEMY_SIZE, y + ENEMY_SIZE, fill="brown", outline=""
+        gx1, gy1, gx1 + ENEMY_SIZE, gy1 + ENEMY_SIZE, fill="brown", outline=""
+    )
+
+    gx2 = (col - 3) * CELL
+    gy2 = row * CELL//3
+    goomba_2 =canvas.create_rectangle(
+        gx2, gy2, gx2 + ENEMY_SIZE, gy2 + ENEMY_SIZE, fill="brown", outline=""
     )
 
     goombas.append({
@@ -144,7 +153,13 @@ def create_goomba(x_col, y_row):
         "dy": 0,
     })
 
-def check_goomba_platform_collision():
+    goombas.append({
+        "id": goomba_2,
+        "dx": -2,
+        "dy": 0,
+    })
+
+def check_goomba_ground_collision():
     for g in goombas:
         g["ON_GROUND"]= False
         goomba_id = g["id"]
@@ -167,6 +182,36 @@ def check_goomba_platform_collision():
                     g["ON_GROUND"] = True
                     break
 
+def check_goomba_platform_collision():
+    global ON_GROUND, GOOMBA_DY
+    g_coords = canvas.coords(goombas)
+    if not g_coords:
+        return
+    
+    gx1, gy1, gx2, gy2 = g_coords[0], g_coords[1], g_coords[2], g_coords[3]
+    for plat in platforms:
+        plat_coords = canvas.coords(plat)
+        x1, y1, x2, y2 = plat_coords[0], plat_coords[1], plat_coords[2], plat_coords[3]
+        
+        if gx2 > x1 and gx1 < x2:
+            if GOOMBA_DY >= 0 and gy2 <= y1 and (gy2 + GOOMBA_DY) >= y1:
+               canvas.move(goombas, 0, y1 - gy2)
+               g["GOOMBA_DY"] = 0
+               g["ON_GROUND"] = True
+               return
+            if gy2 > y1 and gy2 < y1 + 10:
+               canvas.move(goombas, 0, y1 - gy2)
+               g["GOOMBA_DY"] = 0
+               g["ON_GROUND"] = True
+               return
+            elif GOOMBA_DY < 0:
+                if prev_gy1 >= y2 and gy1 <= y2:
+                    canvas.move(goombas, 0, y2 - gy1)
+                    g["GOOMBA_DY"] = 0
+                    return
+
+    
+
 def move_goombas():
     for g in goombas:
         goomba_id = g["id"]
@@ -186,7 +231,7 @@ def goomba_collision_with_player():
     px1, py1, px2, py2 = p_coords 
     for g in goombas[:]:
         goomba_id = g["id"]
-        g_coords = canvas.bbox(goomba_id)
+        g_coords = canvas.coords(goomba_id)
         if not g_coords:
             continue
  
@@ -225,6 +270,27 @@ def goomba_collision_with_player():
                 )
             break
 
+def restart_game(event=None):
+    global player, enemies, platforms, lives
+    global PLAYER_DX, PLAYER_DY, ON_GROUND, alive, lives_text
+    global platform_data
+
+    canvas.delete("all")
+    goombas.clear()
+    platforms.clear()
+
+    PLAYER_DX = 0
+    PLAYER_DY = 0
+    ON_GROUND = False
+    alive = True
+    lives = 3
+
+    player = canvas.create_rectangle(x, y, x+PLAYER_SIZE, y+PLAYER_SIZE, fill="red")
+    new_platforms = canvas.create_rectangle(0, ground_top, 100+(CELL * 19) , (HEIGHT * 2),  fill="brown")
+    create_platforms()
+    create_goomba(x_col,y_row)
+    draw_lives()
+
     
 def game_loop():
     global PLAYER_DY, player, goomba_id
@@ -233,7 +299,8 @@ def game_loop():
     check_ground_collision(player)
     check_platform_collision()
     move_goombas()
-    check_goomba_platform_collision()  
+    check_goomba_ground_collision()  
+    check_goomba_platform_collision()
     goomba_collision_with_player()
     root.after(16, game_loop)
 
@@ -254,13 +321,13 @@ def jump(event):
        
 root.bind("<Left>",move_left)
 root.bind("<Right>",move_right)
-
 root.bind("<Up>",jump)
-
+root.bind("r",restart_game)
 create_platforms()
-create_goomba(x_col, y_row) # Create a Goomba once at the start
+create_goomba(x_col, y_row) 
 ## check_ground_collision()
 check_platform_collision()
+restart_game(event=None)
 game_loop()
 
 root.mainloop()
