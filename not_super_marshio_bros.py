@@ -292,6 +292,7 @@ def restart_game(event=None):
     draw_lives()
 
     
+
 def game_loop():
     global PLAYER_DY, player, goomba_id
     PLAYER_DY += GRAVITY
